@@ -1,18 +1,6 @@
-//https://list.tmall.com/search_product.htm?
-//spm=a220m.1000858.1000724.4.7CwVbY&
-//brand=3228590&q=%B6%AB%B0%A2%B0%A2%BD%BA
-//&sort=d&style=g&from=95095.detail.pc_1_searchbutton
-//&smAreaId=110100#J_Filter
-
-//https://list.tmall.com/search_product.htm?
-//spm=a220m.1000858.1000724.1.VwP9PA
-//&brand=3228590&q=%B6%AB%B0%A2%B0%A2%BD%BA
-//&sort=s&style=g&from=95095.detail.pc_1_searchbutton
-//&smAreaId=110100#J_Filter
-
 var casper = require('casper').create({
-    // verbose: true,
-    // logLevel: 'debug',
+    verbose: true,
+    logLevel: 'debug',
     pageSettings: {
         loadImages:  false,        // The WebPage instance used by Casper will
         loadPlugins: false         // use these settings
@@ -20,6 +8,8 @@ var casper = require('casper').create({
     // onError: function(msg, backtrace){this.echo("msg")}
 });
 
+var dir = casper.cli.get('dir-path');
+casper.options.clientScripts = [dir + "/jquery-3.1.1.min.js"];
 // url = "https://list.tmall.com/search_product.htm?q=%B6%AB%B0%A2%B0%A2%BD%BA&type=p"
 var url = casper.cli.get('search-url');
 
@@ -80,6 +70,7 @@ function crawlNextPage(){
 function parseItem(document) {
     var crawled_items = this.evaluate(function(){
         var products = document.querySelectorAll("#J_ItemList .product");
+        var $j = jQuery.noConflict();
         items = [];
         for(var i = 0; i < products.length; i++){
             var item = {}
@@ -87,16 +78,20 @@ function parseItem(document) {
             item['name'] = product.querySelector(".productTitle a").title;
             item['url'] = product.querySelector(".productTitle a").href;    
             item['price'] = product.querySelector(".productPrice em").title;
+            item['month_sale_num'] = "无"
+            item['rate_num'] = "无"
             if(product.querySelectorAll(".productStatus").length > 0 ){
                 item['month_sale_num'] = product.querySelector(".productStatus em").innerHTML;
-            }else{
-                item['month_sale_num'] = -1
+                jRate = $j(product).find(".productStatus span").filter(":contains('评价')");
+                if(jRate){
+                    item['rate_num'] = jRate.find("a").text()
+                }
             }
             items.push(item)
         }
         return items
     });
-    this.echo(JSON.stringify(crawled_items));
+    this.echo("Browser Spider:" + JSON.stringify(crawled_items));
 }
 
 

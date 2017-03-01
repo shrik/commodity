@@ -5,7 +5,7 @@ import re
 import datetime
 from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
-from sqlalchemy import Column, Integer, String, DateTime, text
+from sqlalchemy import Column, Integer, String, DateTime, Text, text
 
 # TODO 促销价格等需要更复杂的逻辑
 # TODO 选择套餐类型等
@@ -26,6 +26,8 @@ class Item(Base):
     accumulate_rate_num = Column(Integer)
     promotion_price = Column(Integer)
     date_i = Column(Integer)
+    stock = Column(Integer)
+    item_attr = Column(Text(65536))
     
     def __repr__(self):
         return "<User(name='%s', id='%s', sku_id='%s', store_name='%s')>" % (self.name, self.id, self.sku_id, self.store_name)

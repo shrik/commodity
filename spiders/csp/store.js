@@ -1,14 +1,21 @@
 var casper = require('casper').create({
-    // verbose: true,
-    // logLevel: 'debug',
+    verbose: true,
+    logLevel: 'debug',
     pageSettings: {
         loadImages:  false,        // The WebPage instance used by Casper will
         loadPlugins: false         // use these settings
     },
     // waitTimeout: 10*10000,
+    // clientScripts: [+ '/jquery-3.1.1.min.js']
 
     // onError: function(msg, backtrace){this.echo("msg")}
 });
+
+
+
+
+var dir = casper.cli.get('dir-path');
+casper.options.clientScripts = [dir + "/jquery-3.1.1.min.js"]
 
 casper.on("page.error", function(msg, backtrace) {
      var msgStack = ['Page Error: ' + msg];
@@ -66,40 +73,6 @@ var url = casper.cli.get('store-url');
 // var url = "https://deejdyf.yao.95095.com/category.htm"
 casper.start(url , executeParse);
 
-
-
-
-
-
-// casper.start('https://www.baidu.com/');
-
-// casper.then(function(){
-//     bb = aa + cc;
-//     this.echo(x);
-// });
-
-// all items  .J_TItems
-// .item4line1 before pagination
-// .item -> {.detail -> {a.item-name, .attribute->{.c-price, .sale-num}}}
-// 
-
-
-// next page .pagination.next
-// if <a> with text "下一页" disabled
-
-
-/*
-case 2
-all items  .J_TItems
-.item5line1 before .pagination
-others are same 
-
-
-*/
-
-
-
-
 function parseItems(document) {
     // this.echo('First Page: ' + this.getTitle());
     var items = this.evaluate(function(){
@@ -110,12 +83,14 @@ function parseItems(document) {
         }else{
             line_selector = ".item5line1";
         }
-        var linesBag = itemsBag.querySelectorAll(line_selector);
+        var $j = jQuery.noConflict();
+        var jLinesBag = $j(".J_TItems .pagination").prevAll();
+        // var linesBag = itemsBag.querySelectorAll(line_selector);
 
-        function extractItems(linesBag){
+        function extractItems(jLinesBag){
             var items = [];
-            for(var i = 0; i < linesBag.length; i++){
-                var lineBag = linesBag[i].querySelectorAll(".item");
+            jLinesBag.each(function(i, line){
+                var lineBag = line.querySelectorAll(".item");
                 for(var j=0; j < lineBag.length; j++){
                     itemBag = lineBag[j]
                     item = {}
@@ -126,18 +101,18 @@ function parseItems(document) {
                     if(itemBag.querySelector(".rates span")){
                         item['rate_num'] = itemBag.querySelector(".rates span").innerHTML;    
                     }else{
-                        item['rate_num'] = -1
+                        item['rate_num'] = "None"
                     }
-                    
                     items.push(item)
                 }
-            }
+            })
+                
             return items
         }
         // this.console.log(linesBag.length);
-        return extractItems(linesBag);
+        return extractItems(jLinesBag);
     });
-    this.echo(JSON.stringify(items));
+    this.echo("Browser Spider:" + JSON.stringify(items));
 }
 
 
