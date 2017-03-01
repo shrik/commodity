@@ -23,7 +23,9 @@ js_dir = path + "/../spiders/csp"
 def crawl_item(item):
     cmd = "casperjs --engine=slimerjs --ssl-protocol=any --ignore-ssl-errors=true %s/item.js --item-url='%s'" % (js_dir, item.url)
     print("cmd: %s" % cmd)
-    result = util.casper_result(commands.getstatusoutput(cmd)[1])[0]
+    # print(commands.getstatusoutput(cmd))
+    op = os.popen(cmd).readlines()
+    result = util.casper_result(op)[0]
     js = json.loads(result)
     item.month_sale_num = util.extract_num(js['month_sale_num'])
     item.store_name = js['shop_name']

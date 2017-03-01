@@ -1,10 +1,14 @@
 import re
 def casper_result(text):
-    lines = []
-    for line in text.split("\n"):
+    if(type(text) == list):
+        lines = text
+    else:
+        lines = text.split("\n")
+    result = []
+    for line in lines:
         if line.startswith("Browser Spider:"):
-            lines.append(line.replace("Browser Spider:", ""))
-    return lines
+            result.append(line.strip().replace("Browser Spider:", ""))
+    return result
 
 
 
