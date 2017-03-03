@@ -1,2 +1,3 @@
 *.pyc
 etl/screen_capture.png
+spiders/.DS_Store
